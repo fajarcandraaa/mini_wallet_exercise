@@ -63,6 +63,9 @@ func (u *WalletUseCase) EnabledWallet(w http.ResponseWriter, r *http.Request) {
 		case entity.ErrPermissionNotAllowed:
 			responder.FieldErrors(w, err, http.StatusUnauthorized, err.Error())
 			return
+		case entity.ErrWalletAlreadyExist:
+			responder.FieldErrors(w, err, http.StatusNotAcceptable, err.Error())
+			return
 		default:
 			responder.FieldErrors(w, err, http.StatusBadRequest, err.Error())
 			return
