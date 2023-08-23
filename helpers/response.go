@@ -248,7 +248,6 @@ func (a *API) Error(code int, message string) *APIError {
 	a.statusCode = code
 	a.Status = StatusAPIError
 	a.Message = message
-	a.State = formatState(a.Status)
 	return &APIError{
 		API: a,
 	}
