@@ -3,6 +3,7 @@ package helpers
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"strings"
 	"unicode"
 
 	"golang.org/x/crypto/bcrypt"
@@ -43,4 +44,18 @@ func GenerateHexadecimalStringTokent() (*string, error) {
 	// Convert random bytes to hexadecimal string
 	hashString := hex.EncodeToString(randomBytes)
 	return &hashString, nil
+}
+
+func ParseTokenHex(token string) (string, error) {
+	substrings := strings.Split(token, " ")
+	trimmedStr := strings.TrimSpace(substrings[1])
+
+	return trimmedStr, nil
+}
+
+func GetCustomerXidFromToken(rdsKey string) string {
+	substrings := strings.Split(rdsKey, " ")
+	trimmedStr := strings.TrimSpace(substrings[1])
+
+	return trimmedStr
 }

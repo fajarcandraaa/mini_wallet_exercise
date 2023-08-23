@@ -7,9 +7,10 @@ const (
 	ErrPermissionNotAllowed = Error("permission.not_allowed")
 
 	//User Error
-	ErrUserNotExist            = Error("domain.user.error.not_exist")
-	ErrUserAlreadyExist        = Error("domain.user.error.email_or_username_alredy_exist")
-	ErrUsersCredentialNotExist = Error("domain.user.error.credential_not_exist")
+	ErrWalletNotExist             = Error("domain.wallet.error.not_exist")
+	ErrWalletAlreadyExist         = Error("domain.wallet.error.already_exist")
+	ErrWalletsCredentialNotExist  = Error("domain.wallet.error.credential_not_exist")
+	ErrWalletsUnprocessableEntity = Error("domain.wallet.error.unprocessable_entity")
 )
 
 func (e Error) Error() string {
