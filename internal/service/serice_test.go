@@ -18,7 +18,7 @@ func testConfig(t *testing.T) (*gorm.DB, *rds.Client, error) {
 
 	db, err := gorm.Open("postgres", dsn) // initiate database for testing
 	require.NoError(t, err)
-	db.AutoMigrate(&entity.Wallet{}, &entity.WalletAccount{})
+	db.AutoMigrate(&entity.Wallet{}, &entity.WalletAccount{}, &entity.WalletTransaction{})
 
 	err = godotenv.Load("../../.env") // Update the path accordingly
 	if err != nil {

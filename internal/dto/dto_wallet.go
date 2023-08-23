@@ -1,10 +1,54 @@
 package dto
 
 import (
+	"time"
+
 	"github.com/fajarcandraaa/mini_wallet_exercise/internal/entity"
 	"github.com/fajarcandraaa/mini_wallet_exercise/internal/presentation"
 	"github.com/google/uuid"
 )
+
+func WalletTrxToResponse(p entity.WalletTransaction) *presentation.DepositResponse {
+	detail := presentation.TrxDetailResponse{
+		ID:          p.WalletTrxID,
+		DepositedBy: p.DepositedBy,
+		Status:      "success",
+		DepositedAt: p.DepositedAt,
+		Amount:      p.WalletBallanceTrx,
+		ReffID:      p.ReferenceID,
+	}
+
+	resp := presentation.DepositResponse{
+		Deposit: detail,
+	}
+
+	return &resp
+}
+
+func AddBalanceRequest(amount int, reffID string) presentation.AddBalanceRequest {
+	resp := presentation.AddBalanceRequest{
+		Amount:  amount,
+		ReffID:  reffID,
+		TrxType: entity.Deposit,
+	}
+
+	return resp
+}
+
+func AddBalanceRequestToDatabase(p presentation.AddBalanceRequest, d presentation.CustomerDataByTokenResponse) *entity.WalletTransaction {
+	t := time.Now()
+	res := entity.WalletTransaction{
+		WalletTrxID:       uuid.NewString(),
+		WalletID:          d.WalletID,
+		WalletTrxType:     &p.TrxType,
+		WalletBallanceTrx: p.Amount,
+		DepositedBy:       d.CustomerID,
+		DepositedAt:       &t,
+		ReferenceID:       p.ReffID,
+	}
+
+	return &res
+}
 
 func CustomerXidToDatabase(p presentation.InitiateWalletAccountRequest) *presentation.NewWalletAccountRequest {
 	res := &presentation.NewWalletAccountRequest{

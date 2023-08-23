@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/fajarcandraaa/mini_wallet_exercise/helpers"
+	"github.com/fajarcandraaa/mini_wallet_exercise/internal/entity"
 	"github.com/fajarcandraaa/mini_wallet_exercise/internal/presentation"
 	"github.com/jinzhu/gorm"
 )
@@ -19,6 +20,27 @@ func NewWalletRepository(db *gorm.DB) *WalletRepository {
 }
 
 var _ WalletRepositoryContract = &WalletRepository{}
+
+// GetDataCustomerByToken implements WalletRepositoryContract.
+func (r *WalletRepository) GetDataCustomerByToken(ctx context.Context, customerXid string) (*presentation.CustomerDataByTokenResponse, error) {
+	var (
+		result presentation.CustomerDataByTokenResponse
+		model  entity.Wallet
+	)
+
+	err := r.db.Model(&model).
+		Select("wallets.wallet_id, wallets.customer_xid, wallet_accounts.account_id").
+		Joins("JOIN wallet_accounts on wallets.customer_xid = wallet_accounts.customer_xid").
+		Where("wallets.customer_xid = ? ", customerXid).
+		Scan(&result).Error
+	if err != nil {
+		return nil, entity.ErrWalletNotExist
+	}
+
+	result.CustomerID = customerXid
+
+	return &result, nil
+}
 
 // StoreNewWallet implements WalletRepositoryContract.
 func (w *WalletRepository) StoreNewWallet(ctx context.Context, payload presentation.NewWalletAccountRequest) (*string, error) {

@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"net/http"
+	"strconv"
 
 	"github.com/fajarcandraaa/mini_wallet_exercise/helpers"
 	"github.com/fajarcandraaa/mini_wallet_exercise/internal/dto"
@@ -75,7 +76,6 @@ func (u *WalletUseCase) EnabledWallet(w http.ResponseWriter, r *http.Request) {
 	response := dto.ToResponse("success", service)
 	responder.SuccessJSON(w, response, http.StatusCreated, "success")
 	return
-
 }
 
 func (u *WalletUseCase) ViewBallance(w http.ResponseWriter, r *http.Request) {
@@ -109,5 +109,43 @@ func (u *WalletUseCase) ViewBallance(w http.ResponseWriter, r *http.Request) {
 
 	response := dto.ToResponse("success", service)
 	responder.SuccessJSON(w, response, http.StatusOK, "success")
+	return
+}
+
+func (u *WalletUseCase) TopUpBalance(w http.ResponseWriter, r *http.Request) {
+	var (
+		responder = helpers.NewHTTPResponse("topUpBallanceOnWallet")
+		ctx       = context.Background()
+		token     = r.Header.Get("Authorization")
+		amount    = r.FormValue("amount")
+		reffId    = r.FormValue("reference_id")
+	)
+
+	amountInt, _ := strconv.Atoi(amount)
+
+	tokenString, err := helpers.ParseTokenHex(token)
+	if err != nil {
+		responder.FieldErrors(w, err, http.StatusUnprocessableEntity, err.Error())
+		return
+	}
+
+	service, err := u.service.WalletTransaction.TopUpVirtualMoney(ctx, amountInt, reffId, tokenString)
+	if err != nil {
+		causer := errors.Cause(err)
+		switch causer {
+		case entity.ErrPermissionNotAllowed:
+			responder.FieldErrors(w, err, http.StatusUnauthorized, err.Error())
+			return
+		case entity.ErrWalletAlreadyExist:
+			responder.FieldErrors(w, err, http.StatusNotAcceptable, err.Error())
+			return
+		default:
+			responder.FieldErrors(w, err, http.StatusBadRequest, err.Error())
+			return
+		}
+	}
+
+	response := dto.ToResponse("success", service)
+	responder.SuccessJSON(w, response, http.StatusCreated, "success")
 	return
 }

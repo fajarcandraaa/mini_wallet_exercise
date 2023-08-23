@@ -22,6 +22,7 @@ type WalletTransaction struct {
 	DepositedAt       *time.Time     `json:"deposited_at"`
 	WithdrawnBy       string         `json:"withdrawn_by" gorm:"size:36;"`
 	WithdrawnAt       *time.Time     `json:"withdrawn_at"`
+	ReferenceID       string         `json:"reference_id" gorm:"size:36;"`
 	CreatedAt         time.Time      `json:"created_at" gorm:"default:CURRENT_TIMESTAMP"`
 	UpdatedAt         time.Time      `json:"updated_at" gorm:"default:CURRENT_TIMESTAMP"`
 }
