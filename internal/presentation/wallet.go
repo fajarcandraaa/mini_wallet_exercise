@@ -11,6 +11,14 @@ type (
 	InitiateWalletAccountRequest struct {
 		CustomerXid string `json:"customer_xid"`
 	}
+
+	NewWalletAccountRequest struct {
+		AccountID      string              `json:"account_id"`
+		WalletID       string              `json:"wallet_id"`
+		CustomerXid    string              `json:"customer_xid"`
+		WalletStatus   entity.WalletStatus `json:"wallet_status"`
+		WalletBallance int                 `json:"wallet_ballance"`
+	}
 )
 
 // Response
