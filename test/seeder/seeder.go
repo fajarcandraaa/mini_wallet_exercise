@@ -30,8 +30,14 @@ func SeedEnabledWalletAccountFaker(db *gorm.DB, rds *redis.Client) (string, erro
 	var (
 		rdsKey = fmt.Sprintf("customerfaker %s", faker.FakeCustomerXID)
 	)
+	fakeWallet := faker.FakeWallet()
+	err := db.Create(&fakeWallet).Error
+	if err != nil {
+		return "", err
+	}
+
 	fakeWalletAccount := faker.FakeWalletAccountEnable()
-	err := db.Create(&fakeWalletAccount).Error
+	err = db.Create(&fakeWalletAccount).Error
 	if err != nil {
 		return "", err
 	}

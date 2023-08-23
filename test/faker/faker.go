@@ -14,7 +14,26 @@ const (
 	FakeWalletID                   = "fc70c26a-5922-4f83-843f-61859f9cf55c"
 	FakeWalletAccountStatusDisable = entity.Disable
 	FakeWalletAccountStatusEnable  = entity.Enable
+	FakeReffID1                    = "49701238-82cd-40c6-9c26-2e546ecc3810"
+	FakeReffID2                    = "01fb925f-74f4-4830-b703-36162cba53ba"
+	FakeReffID3                    = "bc834b22-3fb5-412f-8325-c5710c1b3704"
 )
+
+func FakeWallet() *entity.Wallet {
+	var (
+		t = time.Now()
+	)
+
+	fakeWallet := &entity.Wallet{
+		WalletID:       FakeWalletID,
+		CustomerXid:    FakeCustomerXID,
+		WalletBallance: 0,
+		CreatedAt:      t,
+		UpdatedAt:      t,
+	}
+
+	return fakeWallet
+}
 
 func FakeWalletAccount() *entity.WalletAccount {
 

@@ -8,4 +8,5 @@ import (
 
 type WalletRepositoryContract interface {
 	StoreNewWallet(ctx context.Context, payload presentation.NewWalletAccountRequest) (*string, error)
+	GetDataCustomerByToken(ctx context.Context, customerXid string) (*presentation.CustomerDataByTokenResponse, error)
 }

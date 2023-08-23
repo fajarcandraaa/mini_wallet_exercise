@@ -6,8 +6,9 @@ import (
 )
 
 type Service struct {
-	WalletService WalletServiceContract
-	WalletAccount WalletAccountContract
+	WalletService     WalletServiceContract
+	WalletAccount     WalletAccountContract
+	WalletTransaction WalletTransactionContract
 }
 
 func ServiceWallet(repo *repositories.Repository, rds *redis.Client) WalletServiceContract {
@@ -18,9 +19,14 @@ func ServiceWalletAccount(repo *repositories.Repository, rds *redis.Client) Wall
 	return NewWalletAccountService(repo, rds)
 }
 
+func ServiceWalletTransaction(repo *repositories.Repository, rds *redis.Client) WalletTransactionContract {
+	return NewWalletTransactionsService(repo, rds)
+}
+
 func NewService(repo *repositories.Repository, rds *redis.Client) *Service {
 	return &Service{
-		WalletService: ServiceWallet(repo, rds),
-		WalletAccount: ServiceWalletAccount(repo, rds),
+		WalletService:     ServiceWallet(repo, rds),
+		WalletAccount:     ServiceWalletAccount(repo, rds),
+		WalletTransaction: ServiceWalletTransaction(repo, rds),
 	}
 }

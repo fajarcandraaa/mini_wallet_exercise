@@ -14,4 +14,5 @@ func walletRouter(p *PathPrefix, s *service.Service) {
 
 	p.Wallet.HandleFunc("", walletUseCase.EnabledWallet).Methods("POST")
 	p.Wallet.HandleFunc("", walletUseCase.ViewBallance).Methods("GET")
+	p.Wallet.HandleFunc("/deposits", walletUseCase.TopUpBalance).Methods("POST")
 }
