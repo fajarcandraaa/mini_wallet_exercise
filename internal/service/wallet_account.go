@@ -27,31 +27,12 @@ var _ WalletAccountContract = &walletAccount{}
 
 // EnableWallet implements WalletAccountContract.
 func (s *walletAccount) EnableWallet(ctx context.Context, token string) (*presentation.WalletDataResponse, error) {
-	var (
-		tokenKey string
-	)
-	keys, err := s.rds.Keys(ctx, "*").Result()
+	tokenKey, err := helpers.FindCustomerXidFromToken(ctx, s.rds, token)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, k := range keys {
-		v, err := s.rds.Get(ctx, k).Result()
-		if err != nil {
-			return nil, err
-		}
-		if v == token {
-			tokenKey = k
-			break
-		}
-	}
-
-	if tokenKey == "" {
-		return nil, entity.ErrPermissionNotAllowed
-	}
-
 	customerXid := helpers.GetCustomerXidFromToken(tokenKey)
-
 	enabledWallet, err := s.repo.WalletAccount.UpdateStatus(ctx, entity.Enable, customerXid)
 	if err != nil {
 		return nil, err
@@ -60,5 +41,22 @@ func (s *walletAccount) EnableWallet(ctx context.Context, token string) (*presen
 	rsp := dto.WalletAccountToResponse(*enabledWallet)
 
 	return &rsp, nil
+}
 
+// ViewBallance implements WalletAccountContract.
+func (s *walletAccount) ViewBallanceOnWallet(ctx context.Context, token string) (*presentation.WalletDataResponse, error) {
+	tokenKey, err := helpers.FindCustomerXidFromToken(ctx, s.rds, token)
+	if err != nil {
+		return nil, err
+	}
+
+	customerXid := helpers.GetCustomerXidFromToken(tokenKey)
+	viewBallance, err := s.repo.WalletAccount.GetBalanceByCustomerXID(ctx, customerXid)
+	if err != nil {
+		return nil, err
+	}
+
+	rsp := dto.WalletAccountToResponse(*viewBallance)
+
+	return &rsp, nil
 }

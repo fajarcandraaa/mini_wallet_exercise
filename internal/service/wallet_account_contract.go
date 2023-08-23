@@ -8,4 +8,5 @@ import (
 
 type WalletAccountContract interface {
 	EnableWallet(ctx context.Context, token string) (*presentation.WalletDataResponse, error)
+	ViewBallanceOnWallet(ctx context.Context, token string) (*presentation.WalletDataResponse, error)
 }
