@@ -77,3 +77,37 @@ func (u *WalletUseCase) EnabledWallet(w http.ResponseWriter, r *http.Request) {
 	return
 
 }
+
+func (u *WalletUseCase) ViewBallance(w http.ResponseWriter, r *http.Request) {
+	var (
+		responder = helpers.NewHTTPResponse("viewBallanceOnWallet")
+		ctx       = context.Background()
+		token     = r.Header.Get("Authorization")
+	)
+
+	tokenString, err := helpers.ParseTokenHex(token)
+	if err != nil {
+		responder.FieldErrors(w, err, http.StatusUnprocessableEntity, err.Error())
+		return
+	}
+
+	service, err := u.service.WalletAccount.ViewBallanceOnWallet(ctx, tokenString)
+	if err != nil {
+		causer := errors.Cause(err)
+		switch causer {
+		case entity.ErrPermissionNotAllowed:
+			responder.FieldErrors(w, err, http.StatusUnauthorized, err.Error())
+			return
+		case entity.ErrWalletAlreadyExist:
+			responder.FieldErrors(w, err, http.StatusNotAcceptable, err.Error())
+			return
+		default:
+			responder.FieldErrors(w, err, http.StatusBadRequest, err.Error())
+			return
+		}
+	}
+
+	response := dto.ToResponse("success", service)
+	responder.SuccessJSON(w, response, http.StatusOK, "success")
+	return
+}

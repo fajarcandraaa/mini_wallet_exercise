@@ -23,17 +23,18 @@ var _ WalletAccountRepositoryContract = &WalletAccountRepository{}
 // UpdateStatus implements WalletAccountRepositoryContract.
 func (r *WalletAccountRepository) UpdateStatus(ctx context.Context, status entity.WalletStatus, custromerXid string) (*entity.WalletAccount, error) {
 	var (
-		exist bool
-		result     entity.WalletAccount
-		t          = time.Now()
+		exist  bool
+		result entity.WalletAccount
+		t      = time.Now()
 	)
+
 	err := r.db.First(&result, "customer_xid = ? AND wallet_status = ?", custromerXid, status).Error
 	if err != nil {
 		exist = false
 	} else {
 		exist = true
 	}
-	
+
 	if exist {
 		return nil, entity.ErrWalletAlreadyExist
 	}
@@ -54,4 +55,18 @@ func (r *WalletAccountRepository) UpdateStatus(ctx context.Context, status entit
 	}
 
 	return &result, nil
+}
+
+// GetBalanceByCustomerXID implements WalletAccountRepositoryContract.
+func (r *WalletAccountRepository) GetBalanceByCustomerXID(ctx context.Context, customerXID string) (*entity.WalletAccount, error) {
+	var (
+		walletAccount entity.WalletAccount
+	)
+
+	err := r.db.First(&walletAccount, "customer_xid = ? AND wallet_status = ?", customerXID, "enabled").Error
+	if err != nil {
+		return nil, entity.ErrWalletNotExist
+	}
+
+	return &walletAccount, nil
 }

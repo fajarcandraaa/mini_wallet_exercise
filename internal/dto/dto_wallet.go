@@ -19,15 +19,19 @@ func CustomerXidToDatabase(p presentation.InitiateWalletAccountRequest) *present
 }
 
 func WalletAccountToResponse(p entity.WalletAccount) presentation.WalletDataResponse {
-	res := presentation.WalletDataResponse{
+	res := presentation.WalletDetailDataResponse{
 		ID:        p.AccountID,
 		OwnedBy:   p.CustomerXid,
 		Status:    string(*p.Status),
-		EnabledAt: p.EnabledAt.String(),
+		EnabledAt: *p.EnabledAt,
 		Balance:   p.WalletBallance,
 	}
 
-	return res
+	result := presentation.WalletDataResponse{
+		Wallet: res,
+	}
+
+	return result
 }
 
 func TokenToResponse(t string) presentation.InitiateWalletAccountResponse {

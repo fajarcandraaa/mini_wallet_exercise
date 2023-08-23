@@ -31,7 +31,7 @@ var _ WalletServiceContract = &walletService{}
 // CreateAccount implements WalletServiceContract.
 func (s *walletService) CreateAccount(ctx context.Context, payload presentation.InitiateWalletAccountRequest) (*presentation.InitiateWalletAccountResponse, error) {
 	var (
-		rdsKey     = fmt.Sprintf("customer-%s", payload.CustomerXid)
+		rdsKey     = fmt.Sprintf("customer %s", payload.CustomerXid)
 		expiration = 7 * 24 * time.Hour
 	)
 
