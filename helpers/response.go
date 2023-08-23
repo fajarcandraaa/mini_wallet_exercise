@@ -145,7 +145,7 @@ func (a *API) Success(data interface{}, code int, message string) *APISuccess {
 }
 
 // SuccessResponseJSON setting response for success condition
-func SuccessResponseJSON(w http.ResponseWriter, statusCode int, data *APISuccess) error {
+func SuccessResponseJSON(w http.ResponseWriter, statusCode int, data interface{}) error {
 	// If there is nothing to marshal then set status code and return.
 	if statusCode == http.StatusNoContent {
 		w.WriteHeader(http.StatusNoContent)
@@ -172,8 +172,42 @@ func SuccessResponseJSON(w http.ResponseWriter, statusCode int, data *APISuccess
 	return nil
 }
 
-// Success returns response format for success state.
+func SuccessResponseJSONV2(w http.ResponseWriter, statusCode int, data *APISuccess) error {
+	// If there is nothing to marshal then set status code and return.
+	if statusCode == http.StatusNoContent {
+		w.WriteHeader(http.StatusNoContent)
+		return nil
+	}
+
+	// Encode the data to JSON.
+	jsonData, err := json.MarshalIndent(data, "", "\t")
+	if err != nil {
+		return err
+	}
+
+	// Set the content type and headers once we know marshaling has succeeded.
+	w.Header().Set("Content-Type", "application/json")
+
+	// Write the status code to the response.
+	w.WriteHeader(statusCode)
+
+	// Send the result back to the client.
+	if _, err := w.Write(jsonData); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (a *API) SuccessJSON(w http.ResponseWriter, data interface{}, code int, message string) {
+	a.statusCode = code
+	response := data
+
+	SuccessResponseJSON(w, a.statusCode, response)
+}
+
+// Success returns response format for success state.
+func (a *API) SuccessJSONV2(w http.ResponseWriter, data interface{}, code int, message string) {
 	a.statusCode = code
 	a.Status = StatusAPISuccess
 	a.Message = message
@@ -183,7 +217,7 @@ func (a *API) SuccessJSON(w http.ResponseWriter, data interface{}, code int, mes
 		Data: data,
 	}
 
-	SuccessResponseJSON(w, a.statusCode, response)
+	SuccessResponseJSONV2(w, a.statusCode, response)
 }
 
 // SuccessWithMeta returns response format for success state but with metadata.
@@ -191,7 +225,7 @@ func (a *API) SuccessWithMeta(w http.ResponseWriter, data interface{}, meta Pagi
 	res := a.Success(data, code, message)
 	res.Meta = meta
 
-	SuccessResponseJSON(w, res.statusCode, res)
+	SuccessResponseJSONV2(w, res.statusCode, res)
 }
 
 // SuccessWithoutData returns response format for success state without data.
@@ -203,7 +237,7 @@ func (a *API) SuccessWithoutData(w http.ResponseWriter, code int, message string
 	response := &APISuccess{
 		API: a,
 	}
-	SuccessResponseJSON(w, a.statusCode, response)
+	SuccessResponseJSONV2(w, a.statusCode, response)
 }
 
 // ============================= ======================= ===================================

@@ -16,7 +16,7 @@ const (
 type WalletAccount struct {
 	AccountID      string        `json:"account_id" gorm:"size:36;not null;unique index;primaryKey"`
 	CustomerXid    string        `json:"customer_xid" gorm:"size:36;"`
-	Status         *WalletStatus `json:"status" gorm:"column:wallet_status;"`
+	Status         *WalletStatus `json:"wallet_status" gorm:"column:wallet_status;"`
 	WalletBallance int           `json:"wallet_ballance" gorm:"size:255;"`
 	EnabledAt      *time.Time    `json:"enabled_at"`
 	CreatedAt      time.Time     `json:"created_at" gorm:"default:CURRENT_TIMESTAMP"`
