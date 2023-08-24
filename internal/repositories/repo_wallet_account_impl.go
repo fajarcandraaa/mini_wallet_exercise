@@ -39,14 +39,27 @@ func (r *WalletAccountRepository) UpdateStatus(ctx context.Context, status entit
 		return nil, entity.ErrWalletAlreadyExist
 	}
 
-	err = r.db.Model(&result).
-		Where("customer_xid = ?", custromerXid).
-		Updates(entity.WalletAccount{
-			Status:    &status,
-			EnabledAt: &t,
-		}).Error
-	if err != nil {
-		return nil, err
+	switch status {
+	case "enabled":
+		err = r.db.Model(&result).
+			Where("customer_xid = ?", custromerXid).
+			Updates(entity.WalletAccount{
+				Status:    &status,
+				EnabledAt: &t,
+			}).Error
+		if err != nil {
+			return nil, err
+		}
+	default:
+		err = r.db.Model(&result).
+			Where("customer_xid = ?", custromerXid).
+			Updates(entity.WalletAccount{
+				Status:     &status,
+				DisabledAt: &t,
+			}).Error
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	err = r.db.First(&result, "customer_xid = ?", custromerXid).Error
