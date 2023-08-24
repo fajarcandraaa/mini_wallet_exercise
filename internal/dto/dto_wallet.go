@@ -8,18 +8,37 @@ import (
 	"github.com/google/uuid"
 )
 
-func WalletTrxToResponse(p entity.WalletTransaction) *presentation.DepositResponse {
-	detail := presentation.TrxDetailResponse{
-		ID:          p.WalletTrxID,
-		DepositedBy: p.DepositedBy,
-		Status:      "success",
-		DepositedAt: p.DepositedAt,
-		Amount:      p.WalletBallanceTrx,
-		ReffID:      p.ReferenceID,
-	}
+func WalletTrxToResponse(p entity.WalletTransaction) *presentation.DepositOrWithdrawlResponse {
+	var (
+		resp    presentation.DepositOrWithdrawlResponse
+		trxType = p.WalletTrxType
+	)
+	switch *trxType {
+	case entity.Deposit:
+		detail := &presentation.TrxDetailResponse{
+			ID:          p.WalletTrxID,
+			DepositedBy: p.DepositedBy,
+			Status:      "success",
+			DepositedAt: p.DepositedAt,
+			Amount:      p.WalletBallanceTrx,
+			ReffID:      p.ReferenceID,
+		}
 
-	resp := presentation.DepositResponse{
-		Deposit: detail,
+		resp = presentation.DepositOrWithdrawlResponse{
+			Deposit: detail,
+		}
+	default:
+		detail := &presentation.TrxDetailResponse{
+			ID:          p.WalletTrxID,
+			WithdrawnBy: p.WithdrawnBy,
+			Status:      "success",
+			WithdrawnAt: p.WithdrawnAt,
+			Amount:      p.WalletBallanceTrx,
+			ReffID:      p.ReferenceID,
+		}
+		resp = presentation.DepositOrWithdrawlResponse{
+			Withdrawl: detail,
+		}
 	}
 
 	return &resp
@@ -35,6 +54,16 @@ func AddBalanceRequest(amount int, reffID string) presentation.AddBalanceRequest
 	return resp
 }
 
+func WithdrawlBalanceRequest(amount int, reffID string) presentation.AddBalanceRequest {
+	resp := presentation.AddBalanceRequest{
+		Amount:  amount,
+		ReffID:  reffID,
+		TrxType: entity.Withdrawl,
+	}
+
+	return resp
+}
+
 func AddBalanceRequestToDatabase(p presentation.AddBalanceRequest, d presentation.CustomerDataByTokenResponse) *entity.WalletTransaction {
 	t := time.Now()
 	res := entity.WalletTransaction{
@@ -44,6 +73,21 @@ func AddBalanceRequestToDatabase(p presentation.AddBalanceRequest, d presentatio
 		WalletBallanceTrx: p.Amount,
 		DepositedBy:       d.CustomerID,
 		DepositedAt:       &t,
+		ReferenceID:       p.ReffID,
+	}
+
+	return &res
+}
+
+func WithdrawlBalanceRequestToDatabase(p presentation.AddBalanceRequest, d presentation.CustomerDataByTokenResponse) *entity.WalletTransaction {
+	t := time.Now()
+	res := entity.WalletTransaction{
+		WalletTrxID:       uuid.NewString(),
+		WalletID:          d.WalletID,
+		WalletTrxType:     &p.TrxType,
+		WalletBallanceTrx: p.Amount,
+		WithdrawnBy:       d.CustomerID,
+		WithdrawnAt:       &t,
 		ReferenceID:       p.ReffID,
 	}
 

@@ -63,18 +63,19 @@ type (
 	}
 
 	TrxDetailResponse struct {
-		ID          string     `json:"id"`
+		ID          string     `json:"id,omitempty"`
 		DepositedBy string     `json:"deposited_by,omitempty"`
 		WithdrawnBy string     `json:"withdrawn_by,omitempty"`
-		Status      string     `json:"status"`
+		Status      string     `json:"status,omitempty"`
 		DepositedAt *time.Time `json:"deposited_at,omitempty"`
 		WithdrawnAt *time.Time `json:"withdrawn_at,omitempty"`
-		Amount      int        `json:"amount"`
-		ReffID      string     `json:"reference_id"`
+		Amount      int        `json:"amount,omitempty"`
+		ReffID      string     `json:"reference_id,omitempty"`
 	}
 
-	DepositResponse struct {
-		Deposit TrxDetailResponse `json:"deposit"`
+	DepositOrWithdrawlResponse struct {
+		Deposit   *TrxDetailResponse `json:"deposit,omitempty"`
+		Withdrawl *TrxDetailResponse `json:"withdrawl,omitempty"`
 	}
 
 	WalletTransactionDetailResponse struct {
