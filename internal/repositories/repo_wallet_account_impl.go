@@ -63,7 +63,11 @@ func (r *WalletAccountRepository) GetBalanceByCustomerXID(ctx context.Context, c
 		walletAccount entity.WalletAccount
 	)
 
-	err := r.db.First(&walletAccount, "customer_xid = ? AND wallet_status = ?", customerXID, "enabled").Error
+	err := r.db.Model(&walletAccount).
+		Select("wallet_accounts.account_id , wallet_accounts.customer_xid , wallets.wallet_ballance, wallet_accounts.wallet_status , wallet_accounts.enabled_at , wallet_accounts.created_at , wallet_accounts.updated_at").
+		Joins("JOIN wallets on  wallet_accounts.customer_xid = wallets.customer_xid").
+		Where("wallet_accounts.customer_xid = ? AND wallet_accounts.wallet_status = ?", customerXID, "enabled").
+		Scan(&walletAccount).Error
 	if err != nil {
 		return nil, entity.ErrWalletNotExist
 	}

@@ -27,7 +27,7 @@ func NewWalletTransactionsService(repo *repositories.Repository, rds *redis.Clie
 var _ WalletTransactionContract = &walletTransactions{}
 
 // TopUpVirtualMoney implements WalletTransactionContract.
-func (s *walletTransactions) TopUpVirtualMoney(ctx context.Context, amount int, reffID, token string) (*presentation.DepositResponse, error) {
+func (s *walletTransactions) TopUpVirtualMoney(ctx context.Context, amount int, reffID, token string) (*presentation.DepositOrWithdrawlResponse, error) {
 	tokenKey, err := helpers.FindCustomerXidFromToken(ctx, s.rds, token)
 	if err != nil {
 		return nil, err
@@ -52,6 +52,40 @@ func (s *walletTransactions) TopUpVirtualMoney(ctx context.Context, amount int, 
 	}
 
 	_, err = s.repo.WalletTransaction.AddBalance(ctx, *payloadToDB)
+	if err != nil {
+		return nil, err
+	}
+
+	response := dto.WalletTrxToResponse(*payloadToDB)
+	return response, nil
+}
+
+// UseVirtualMoney implements WalletTransactionContract.
+func (s *walletTransactions) UseVirtualMoney(ctx context.Context, amount int, reffID string, token string) (*presentation.DepositOrWithdrawlResponse, error) {
+	tokenKey, err := helpers.FindCustomerXidFromToken(ctx, s.rds, token)
+	if err != nil {
+		return nil, err
+	}
+
+	customerXid := helpers.GetCustomerXidFromToken(tokenKey)
+	customerDetail, err := s.repo.Wallet.GetDataCustomerByToken(ctx, customerXid)
+	if err != nil {
+		return nil, err
+	}
+	payloadBalance := dto.WithdrawlBalanceRequest(amount, reffID)
+	err = validation.ValidateStruct(&payloadBalance,
+		validation.Field(&payloadBalance.ReffID, validation.Required, validation.Match(regexp.MustCompile(`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$`)), validation.Length(3, 100)),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	payloadToDB := dto.WithdrawlBalanceRequestToDatabase(payloadBalance, *customerDetail)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = s.repo.WalletTransaction.SubtractBalance(ctx, *payloadToDB)
 	if err != nil {
 		return nil, err
 	}

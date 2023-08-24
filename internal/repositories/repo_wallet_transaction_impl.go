@@ -25,7 +25,7 @@ func (r *WalletTransactionsRepository) AddBalance(ctx context.Context, p entity.
 		result      entity.WalletTransaction
 		exist       = false
 		reffID      = p.ReferenceID
-		querySearch = `SELECT wallet_trx_id FROM wallet_transactions WHERE reference_id = $1`
+		querySearch = `SELECT wallet_trx_id FROM wallet_transactions WHERE reference_id = $1 AND wallet_trx_type = 'deposit'`
 		queryTrx    = `
 			INSERT INTO wallet_transactions
 			(wallet_trx_id, wallet_id, wallet_trx_type, wallet_ballance_trx, deposited_by, deposited_at, reference_id)
@@ -87,7 +87,69 @@ func (r *WalletTransactionsRepository) AddBalance(ctx context.Context, p entity.
 
 }
 
-// ReduceBalance implements WalletTransactionsRepositoryContract.
-func (*WalletTransactionsRepository) ReduceBalance(ctx context.Context, p entity.WalletTransaction) error {
-	panic("unimplemented")
+// SubtractBalance implements WalletTransactionsRepositoryContract.
+func (r *WalletTransactionsRepository) SubtractBalance(ctx context.Context, p entity.WalletTransaction) (*entity.WalletTransaction, error) {
+	var (
+		result      entity.WalletTransaction
+		exist       = false
+		reffID      = p.ReferenceID
+		querySearch = `SELECT wallet_trx_id FROM wallet_transactions WHERE reference_id = $1 AND wallet_trx_type = 'withdrawl'`
+		queryTrx    = `
+			INSERT INTO wallet_transactions
+			(wallet_trx_id, wallet_id, wallet_trx_type, wallet_ballance_trx, withdrawn_by, withdrawn_at, reference_id)
+			VALUES ($1,$2,$3,$4,$5,$6,$7);
+		`
+		queryUpdate = `
+			UPDATE wallets SET wallet_ballance = wallet_ballance - $1 WHERE customer_xid = $2;
+		`
+	)
+	arg := []interface{}{
+		&p.WalletTrxID,
+		&p.WalletID,
+		&p.WalletTrxType,
+		&p.WalletBallanceTrx,
+		&p.WithdrawnBy,
+		&p.WithdrawnAt,
+		&p.ReferenceID,
+	}
+	tx := r.db.Begin()
+	// _, err := tx.Raw("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE").Rows()
+	err := tx.Exec("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE").Error
+	if err != nil {
+		return nil, err
+	}
+
+	ex := tx.Exec(querySearch, reffID)
+	if ex.RowsAffected > 0 {
+		exist = true
+	}
+
+	if exist {
+		tx.Rollback()
+		return nil, entity.ErrWalletAlreadyExist
+	}
+
+	err = tx.Exec(queryTrx, arg...).Error
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	argUpdate := []interface{}{
+		&p.WalletBallanceTrx,
+		&p.WithdrawnBy,
+	}
+
+	err = tx.Exec(queryUpdate, argUpdate...).Error
+	if err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	err = tx.Commit().Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &result, nil
 }

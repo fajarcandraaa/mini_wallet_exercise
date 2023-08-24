@@ -8,5 +8,5 @@ import (
 
 type WalletTransactionsRepositoryContract interface {
 	AddBalance(ctx context.Context, p entity.WalletTransaction) (*entity.WalletTransaction, error)
-	ReduceBalance(ctx context.Context, p entity.WalletTransaction) error
+	SubtractBalance(ctx context.Context, p entity.WalletTransaction) (*entity.WalletTransaction, error)
 }
