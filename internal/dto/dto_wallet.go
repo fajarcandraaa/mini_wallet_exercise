@@ -146,14 +146,28 @@ func CustomerXidToDatabase(p presentation.InitiateWalletAccountRequest) *present
 }
 
 func WalletAccountToResponse(p entity.WalletAccount) presentation.WalletDataResponse {
-	res := presentation.WalletDetailDataResponse{
-		ID:        p.AccountID,
-		OwnedBy:   p.CustomerXid,
-		Status:    string(*p.Status),
-		EnabledAt: *p.EnabledAt,
-		Balance:   p.WalletBallance,
+	var (
+		res presentation.WalletDetailDataResponse
+	)
+	switch *p.Status {
+	case "enabled":
+		res = presentation.WalletDetailDataResponse{
+			ID:        p.AccountID,
+			OwnedBy:   p.CustomerXid,
+			Status:    string(*p.Status),
+			EnabledAt: *p.EnabledAt,
+			Balance:   p.WalletBallance,
+		}
+	default:
+		res = presentation.WalletDetailDataResponse{
+			ID:         p.AccountID,
+			OwnedBy:    p.CustomerXid,
+			Status:     string(*p.Status),
+			DisabledAt: *p.DisabledAt,
+			Balance:    p.WalletBallance,
+		}
 	}
-
+	
 	result := presentation.WalletDataResponse{
 		Wallet: res,
 	}

@@ -25,6 +25,24 @@ func NewWalletAccountService(repo *repositories.Repository, rds *redis.Client) *
 
 var _ WalletAccountContract = &walletAccount{}
 
+// DisableWallet implements WalletAccountContract.
+func (s *walletAccount) DisableWallet(ctx context.Context, token string) (*presentation.WalletDataResponse, error) {
+	tokenKey, err := helpers.FindCustomerXidFromToken(ctx, s.rds, token)
+	if err != nil {
+		return nil, err
+	}
+
+	customerXid := helpers.GetCustomerXidFromToken(tokenKey)
+	disabledWallet, err := s.repo.WalletAccount.UpdateStatus(ctx, entity.Disable, customerXid)
+	if err != nil {
+		return nil, err
+	}
+
+	rsp := dto.WalletAccountToResponse(*disabledWallet)
+
+	return &rsp, nil
+}
+
 // EnableWallet implements WalletAccountContract.
 func (s *walletAccount) EnableWallet(ctx context.Context, token string) (*presentation.WalletDataResponse, error) {
 	tokenKey, err := helpers.FindCustomerXidFromToken(ctx, s.rds, token)
