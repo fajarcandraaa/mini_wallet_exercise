@@ -1,4 +1,7 @@
 #!/bin/bash
+clean-cache:
+	@go clean -cache
+	
 test-service:
 	@go test  -cover ./internal/service
 

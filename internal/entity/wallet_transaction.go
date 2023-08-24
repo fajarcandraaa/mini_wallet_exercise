@@ -35,3 +35,17 @@ func (ct *WalletTrxType) Scan(value interface{}) error {
 func (ct WalletTrxType) Value() (driver.Value, error) {
 	return string(ct), nil
 }
+
+type WalletTransactions struct {
+	WalletTrxID       string     `json:"wallet_trx_id"`
+	WalletID          string     `json:"wallet_id"`
+	WalletTrxType     string     `json:"wallet_trx_type"`
+	WalletBallanceTrx int        `json:"wallet_ballance_trx"`
+	DepositedBy       string     `json:"deposited_by"`
+	DepositedAt       *time.Time `json:"deposited_at"`
+	WithdrawnBy       string     `json:"withdrawn_by"`
+	WithdrawnAt       *time.Time `json:"withdrawn_at"`
+	ReferenceID       string     `json:"reference_id"`
+	CreatedAt         time.Time  `json:"created_at"`
+	UpdatedAt         time.Time  `json:"updated_at"`
+}

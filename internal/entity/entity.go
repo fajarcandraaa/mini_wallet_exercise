@@ -11,6 +11,7 @@ const (
 	ErrWalletAlreadyExist         = Error("domain.wallet.error.already_exist")
 	ErrWalletsCredentialNotExist  = Error("domain.wallet.error.credential_not_exist")
 	ErrWalletsUnprocessableEntity = Error("domain.wallet.error.unprocessable_entity")
+	ErrWalletsIsDisable           = Error("domain.wallet.error.disable")
 )
 
 func (e Error) Error() string {

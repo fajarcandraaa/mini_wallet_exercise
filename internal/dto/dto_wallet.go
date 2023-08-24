@@ -8,6 +8,45 @@ import (
 	"github.com/google/uuid"
 )
 
+func ListWalletTransactionToResponse(payload []entity.WalletTransactions) *presentation.ListTransactionResponse {
+	var (
+		transactions = []presentation.TrxDetailResponse{}
+		transaction  presentation.TrxDetailResponse
+	)
+
+	for _, p := range payload {
+		switch p.WalletTrxType {
+		case "deposit":
+			detail := &presentation.TrxDetailResponse{
+				ID:          p.WalletTrxID,
+				DepositedBy: p.DepositedBy,
+				Status:      "success",
+				DepositedAt: p.DepositedAt,
+				Amount:      p.WalletBallanceTrx,
+				ReffID:      p.ReferenceID,
+			}
+			transaction = *detail
+		default:
+			detail := &presentation.TrxDetailResponse{
+				ID:          p.WalletTrxID,
+				WithdrawnBy: p.WithdrawnBy,
+				Status:      "success",
+				WithdrawnAt: p.WithdrawnAt,
+				Amount:      p.WalletBallanceTrx,
+				ReffID:      p.ReferenceID,
+			}
+			transaction = *detail
+		}
+		transactions = append(transactions, transaction)
+	}
+
+	res := &presentation.ListTransactionResponse{
+		Transactions: transactions,
+	}
+
+	return res
+}
+
 func WalletTrxToResponse(p entity.WalletTransaction) *presentation.DepositOrWithdrawlResponse {
 	var (
 		resp    presentation.DepositOrWithdrawlResponse
