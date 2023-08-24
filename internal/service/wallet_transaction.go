@@ -26,6 +26,28 @@ func NewWalletTransactionsService(repo *repositories.Repository, rds *redis.Clie
 
 var _ WalletTransactionContract = &walletTransactions{}
 
+// ListTransactionsByWallerID implements WalletTransactionContract.
+func (s *walletTransactions) ListTransactionsByWallerID(ctx context.Context, token string) (*presentation.ListTransactionResponse, error) {
+	tokenKey, err := helpers.FindCustomerXidFromToken(ctx, s.rds, token)
+	if err != nil {
+		return nil, err
+	}
+
+	customerXid := helpers.GetCustomerXidFromToken(tokenKey)
+	customerDetail, err := s.repo.Wallet.GetDataCustomerByToken(ctx, customerXid)
+	if err != nil {
+		return nil, err
+	}
+
+	listTrx, err := s.repo.WalletTransaction.GetListTransactions(ctx, customerDetail.WalletID)
+	if err != nil {
+		return nil, err
+	}
+
+	res := dto.ListWalletTransactionToResponse(listTrx)
+	return res, nil
+}
+
 // TopUpVirtualMoney implements WalletTransactionContract.
 func (s *walletTransactions) TopUpVirtualMoney(ctx context.Context, amount int, reffID, token string) (*presentation.DepositOrWithdrawlResponse, error) {
 	tokenKey, err := helpers.FindCustomerXidFromToken(ctx, s.rds, token)

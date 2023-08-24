@@ -78,6 +78,10 @@ type (
 		Withdrawl *TrxDetailResponse `json:"withdrawl,omitempty"`
 	}
 
+	ListTransactionResponse struct {
+		Transactions []TrxDetailResponse `json:"transactions"`
+	}
+
 	WalletTransactionDetailResponse struct {
 		ID                string                `json:"id"`
 		WalletID          string                `json:"wallet_id"`

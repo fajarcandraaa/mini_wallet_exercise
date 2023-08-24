@@ -7,6 +7,7 @@ import (
 )
 
 type WalletTransactionContract interface {
+	ListTransactionsByWallerID(ctx context.Context, token string) (*presentation.ListTransactionResponse, error)
 	TopUpVirtualMoney(ctx context.Context, amount int, reffID, token string) (*presentation.DepositOrWithdrawlResponse, error)
 	UseVirtualMoney(ctx context.Context, amount int, reffID, token string) (*presentation.DepositOrWithdrawlResponse, error)
 }
