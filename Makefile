@@ -1,5 +1,12 @@
 #!/bin/bash
-clean-cache:
+update:
+	@go get -u
+	
+tidy:
+	@go mod tidy
+	@go mod vendor
+
+clean:
 	@go clean -cache
 	
 test-service:
